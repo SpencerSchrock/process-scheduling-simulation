@@ -1,0 +1,51 @@
+<html>
+<STYLE type="text/css">
+OL.withalpha { list-style-type: lower-alpha }
+</STYLE>
+<center>
+<h3>CMPSC 122<br>
+Spring 2016</h3>
+
+<h3>Homework III<br>
+19 February 2016</h3>
+</center>
+
+This assignment continues the use of linked lists as queues
+to implement simple scheduling policies.
+<p>
+<h4>PROBLEM DESCRIPTION</h4>
+<p>
+No real program uses the CPU for the entirety of its execution.
+It must occasionally interact with an external device, for input
+or output, if it is ever to do anything meaningful.  Most external devices
+appear to be 'slow' from the point of view of the CPU.
+<p>
+A good operating system, then, would not simply have the CPU sit idle
+while a process is accessing the disk or the network or waiting for
+keyboard input.  It will attempt to pass the CPU to some other process
+that is ready to run, resuming the first process at some later point
+when it is ready.
+<p>
+<h4>IMPLEMENTATION DETAILS</h4>
+The new behavior is represented in the provided files. <b>NOTE CAREFULLY:</b> These files have the same name and serve the same purpose as some files for Homework 2.  Take care that you do not overwrite and lose your previous work when you download them!
+<p>
+<tt>process.cpp</tt> extends the constructor so that a process is now represented as a series of CPU bursts separated by disk activity.  When the <tt>run</tt> function completes, it now has another possible response, indicating that a current CPU burst is complete, and that the process wishes to access the disk.
+<p>
+<tt>scheduler.cpp</tt> has a function to respond to that request.  If the <tt>runScheduler</tt> function sees the 'D' returned from <tt>Process::run</tt> it can use the <tt>diskRequest<tt> function to resolve that request.  This function has been encapsulated so that later assignments can do a similar thing for other peripheral devices.
+<p>
+Representing the disk behavior will be vary simple -- with just one integer value representing the time index for when it will next be available for use.  It will handle all requests in the order they arrive, but will not need any queue data structure to do so.
+<p>
+<h4>EXTRA CREDIT OPTION:</h4>
+No programming requirement is here for this part, since this assignment
+overlaps with the first midterm, and time might be better spent starting
+in on Homework 4, which will have a lot of busy work.
+<p>
+But for those who want to think more about what this project means,
+beyond being an exercise in programming with linked lists:
+<p>
+Consider the results of your simulations in Homeworks #2 and #3.
+What effect does the choice of First Come First Served and Round Robin
+have on the outcome?  Can you identify any circumstances that would
+make the Round Robin preferable in either case?
+<p>
+Place your answer in the Message Box when submitting your program.
