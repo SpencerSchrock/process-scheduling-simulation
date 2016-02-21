@@ -16,10 +16,10 @@ int main()
  
    cout << "First Come First Served" << endl;
    sched.runScheduler( tasks, arrival, 3, 500000 );	// FIFO
-   displayHistory( tasks, 3, 0, 2000 );
+   displayHistory( tasks, 3, 0, 3000 );
    cout << endl << "Quanta of 70" << endl;
    sched.runScheduler( tasks, arrival, 3, 70 );	// RR generous
-   displayHistory( tasks, 3, 0, 2000 );
+   displayHistory( tasks, 3, 0, 3000 );
 
 }
 

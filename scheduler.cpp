@@ -19,17 +19,17 @@ void diskRequest( int pid, int clock, int &diskReady, Process tasks[], ProcList 
 {
     
     
-    if (clock >= diskReady){ //disk is free
+    if (clock >= diskReady){ //disk is free, will get now
         diskReady = clock + DISKTIME;
         tasks[pid].addLog(clock, 'D');
     }
-    else {
+    else { //will get disk at time diskReady
         tasks[pid].addLog(clock, '-');
         tasks[pid].addLog(diskReady, 'D');
         diskReady = diskReady + 200;
     }
-    tasks[pid].addLog(diskReady, '-');
-    future.insert(pid, diskReady, 'X');
+    tasks[pid].addLog(diskReady, '-'); //waiting for CPU
+    future.insert(pid, diskReady, 'X'); //add back into process list
 }
 
 
