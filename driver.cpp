@@ -9,6 +9,7 @@ using namespace std;
 
 int main()
 {
+
    Scheduler sched;		    // make a process scheduler
    Process tasks[] = 		    // 3 processes
 	{ Process(0), Process(1), Process(2) };	

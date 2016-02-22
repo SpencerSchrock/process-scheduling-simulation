@@ -9,11 +9,9 @@ Process::Process( int id )  // a constructor
 {
     myId = id;
     bursts = 4 + rand() % 3;    // several CPU bursts
-    //cout<<"id: "<<id<<endl;
     for (int i=0; i < bursts; i++)
     {
         usages[i] = 80 + rand() % 120;
-        //cout << "usages["<<i<<"] = " << usages[i]<<endl;
         nextState[i] = 'D';     // some disk activity
     }
     nextState[bursts-1] = 'Q';  // all done!
@@ -35,8 +33,8 @@ Process::Process( int id )  // a constructor
 //  	at this time
 void Process::run( int &clock, int allowance, char &next )
 {
-    addLog(clock, 'X'); //add the 'x' to the log
-    int start; //start is used here to record the initial clock time
+    addLog(clock, 'X'); //process now using CPU
+    int start; //records the initial clock time
     for(start = clock; clock-start < allowance && remainingTime > 0; clock++) { //run while allowed or needed
         remainingTime = remainingTime - 1;
     }
@@ -45,10 +43,12 @@ void Process::run( int &clock, int allowance, char &next )
         if (next == 'Q') { //if done, mark in log
             addLog(clock, next);
         }
-        currentCycle = currentCycle + 1; //advance cycle
-        remainingTime = usages[currentCycle]; //update time for next CPU burst
+        else {
+            currentCycle = currentCycle + 1; //advance cycle
+            remainingTime = usages[currentCycle]; //update time for next CPU burst
+        }
     }
-    else { //will be waiting to finish CPU burst
+    else { //still needs to finish CPU burst
         next = 'X';
         addLog(clock, '-');
     }
