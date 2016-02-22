@@ -17,19 +17,17 @@ const int DISKTIME = 200;		// how long a disk action requires
 
 void diskRequest( int pid, int clock, int &diskReady, Process tasks[], ProcList &future )
 {
-    
-    
-    if (clock >= diskReady){ //disk is free, will get now
-        diskReady = clock + DISKTIME;
+    if ( clock >= diskReady ) { //disk is free, will get now
         tasks[pid].addLog(clock, 'D');
+        diskReady = clock + DISKTIME;
     }
     else { //will get disk at time diskReady
         tasks[pid].addLog(clock, '-');
         tasks[pid].addLog(diskReady, 'D');
-        diskReady = diskReady + 200;
+        diskReady = diskReady + DISKTIME;
     }
-    tasks[pid].addLog(diskReady, '-'); //waiting for CPU
-    future.insert(pid, diskReady, 'X'); //add back into process list
+    tasks[pid].addLog(diskReady, '-');  //now waiting for CPU
+    future.insert(pid, diskReady, 'X'); //add back into future
 }
 
 
@@ -52,6 +50,8 @@ void Scheduler::runScheduler( Process tasks[], int arrival[], int size, int allo
 {
     int pid;			// process wanting action
     char nextAct;		// and the action it wants
+    clock = 0;			// initialize simulation clock
+    int diskReady = 0;  // initialize time disk is available
     
     for (int i=0; i < size; i++)
     {
@@ -59,31 +59,25 @@ void Scheduler::runScheduler( Process tasks[], int arrival[], int size, int allo
         tasks[i].restart();			// and start at beginning
         tasks[i].addLog( arrival[i], '-');	// might have to wait
     }
-    
-    clock = 0;			// initialize simulation clock
-    int diskReady = 0; //initialize diskReady
+
     //  repeat while anything is ready to run now or later
-    while (!noneReady() || !future.empty() )
+    while ( !noneReady() || !future.empty() )
     {
         //load new processes ready to be run
-        while (!future.empty() && future.leadTime() <= clock) {
+        while ( !future.empty() && future.leadTime() <= clock ) {
             future.popFront(pid, nextAct); //remove from future
             addProcess(pid); //adds to ready set
         }
-        if (noneReady()) //if processes want to run in future and none ready now, advance clock
+        if ( noneReady() ) //if processes want to run in future and none ready now, advance clock
             clock = future.leadTime();
         else {
-        //pick a process to run
-        chooseProcess(pid); //pid will be -1 if none are ready
-        if (pid != -1) { //if readyset isn't empty
+            chooseProcess(pid);
             tasks[pid].run(clock, allowance, nextAct);
-
-            if (nextAct == 'X') { //process still wants to run
+            if ( nextAct == 'X' ) { //process still wants to run
                 future.insert(pid, clock, 'X'); //add back into future
             }
-            else if (nextAct == 'D') {
+            else if ( nextAct == 'D' ) { //wants disk
                 diskRequest(pid, clock, diskReady, tasks, future);
-            }
             }
         }
     }
