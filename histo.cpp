@@ -20,64 +20,75 @@
 #include <iostream>
 #include <iomanip>
 #include "process.h"
+#include <math.h>
 using namespace std;
 
-//adapted from the Prof. Christman's histo.cpp from HW2
+void displayHistory(Process history[], int size, int start, int stop )
+{
+    const int histLength = 50; //number of printable characters representing job history
+    char display[histLength + 1]; //the character array that holds job history
+    
+    cout << "Time: " << start << setw( histLength + 1) << stop << endl;
+    
+    for (int i = 0; i < size; i++) { //repeat for every process
+        ProcList &localHistory = history[i].getLog(); //reference to process log
+        localHistory.condense();
+        ProcIterator iter = localHistory.begin(); //iterator to traverse the log
+        
+        for( int i = 0; i <= histLength; i++ ) { //wipe the character array
+            display[i] = '\0';
+        }
+        
+        cout << setw(5) << i + 1 << setw(1) << " ";  //use loop variable to print current pid
+        int j = 0; //index for the display[] array
+        
+        double totalTime = stop - start; //range of the time interval being printed
+        double currFrac = 0; //fractional amount of the display[] array a state will occupy
 
-void displayHistory(Process history[], int size, int start, int stop) {
-	char display[50];			// to hold the output
-	int outpos;				// next output position to fill
-	int scan;				// next input data item to scan
+        //currState holds the current state from localHistory at the current time
+        //finalChar holds the last state to account for rounding errors from earlier states
+        //finalChar also accounts for when the end time is after the largest time stamp because it is initialized as a space character
+        char currState = ' ', finalChar = ' ';
+        
+        while (iter.time() < start) { // before we get to the start time, find out the current state
+            currState = iter.state();
+            iter.advance();
+        }
+        
+        int time = start; //time holds the value of the last read time
+        
+        //process data while we haven't reached our stop time or the end of our data
+        while ( time < stop && currState != 'Q' && iter != localHistory.end() ) {
+            //calculate the fraction of the current state based on the times and totalTime
+            currFrac = (((iter.time() < stop) ? iter.time() : stop) - time) / totalTime;
 
-	char  currentState;			// current process state in history
-	int time;				// current time examined
-	int range = stop - start;		// total time period
-	int increment = 1 + range / 40;	// round fractions upwards
-
-	cout << "Time:  " << start << setw(range / increment) << stop << endl;
-
-	for (int j = 0; j < size; j++) {
-		for (int i = 0; i < 50; i++)		// intialize display
-			display[i] = ' ';
-
-		ProcList &localHistory = history[j].getLog();	// reference to process log
-		localHistory.condense();
-		cout << localHistory;
-		ProcIterator iter = localHistory.begin();	// starting at its first point
-
-		if (start < iter.time())		//histo starts before log
-			outpos = (iter.time() - start) / increment;	// move to relevant index
-		else
-			outpos = 0;				// start at beginning of display
-		time = start + outpos * increment;	// identify smulation time
-
-		currentState = iter.state();	// initialize if loop never repeats
-		while (time <= stop && time >= iter.time()) { //get current state at current time
-			currentState = iter.state();
-			iter.advance();
-		}
-
-		// collect relevant data into the output array   
-		while (time <= stop && currentState != 'Q' && iter != localHistory.end()) {
-			//record currentState until next state
-			while (time <= stop && time < iter.time()) {
-				display[outpos] = currentState;
-				outpos++;
-				time += increment;
-			}
-			currentState = iter.state();	// update currentState
-			iter.advance();			// and find when it ends
-
-			//look for skipped X states
-			while (currentState != 'Q' && time >= iter.time()) {
-				if (currentState == 'X')	// missed CPU data
-					display[outpos - 1] = 'X';
-				currentState = iter.state();	// update state
-				iter.advance();			//and find when it ends
-			}
-
-		}
-		display[outpos] = '\0';
-		cout << setw(5) << j + 1 << setw(2) << " " << display << endl;
-	}
+            //numChars determines how many chars in the display[] array the current state will occupy
+            int numChars = round(currFrac * histLength);
+            
+            if ((currState == 'X' && numChars == 0)) { //ensures CPU states are not ignored
+                numChars = 1;
+            }
+            
+            //j < histLength included in case everything rounded up and we're out of space
+            for (int k = 0; k < numChars && j < histLength; k++) { //fill display[] for current state
+                display[j] = currState;
+                j = j + 1;
+            }
+            time = iter.time(); //advance time
+            //if the next time is out of range store the finalChar for rounding errors
+            //if the log reaches its Q before the stop time, finalChar retains its space value to fill the display[] array with space chracters
+            if (time >= stop) {
+                finalChar = currState;
+            }
+            currState = iter.state(); //advance state
+            iter.advance(); //move to next node in logHistory
+        }
+        //finishes the display[] array after processing given data. accounts for rounding errors or when the ending time is after the largest time stamp
+        while(j < histLength) {
+            display[j] = finalChar;
+            j = j + 1;
+        }
+        cout << "|" << display << "|" << endl;
+    }
 }
+
