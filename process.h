@@ -2,15 +2,16 @@
 #include <stdlib.h>
 
 // A description of a process, executed in the process scheduling simulation
+class Device;
 class Process
 {
-    private:
+    protected:
 	int myId;		// an identifier for the larger picture
 
 	// A description of the process's total CPU needs
 	int bursts;		// total number of CPU bursts (<= 10)
 	int usages[10];		// lengths of each burst
-	char nextState[10];	// what to do after each burst
+	Device *nextRequest[10];	// what to do after each burst
 
 	// A desription of what this process is doing now
 	int currentCycle;	// which burst is next ro run or continue
@@ -20,16 +21,14 @@ class Process
 	ProcList log;
 
     public:
-        Process( int id );	// the constructor appears in the .cpp
-
-	void restart()		// start at the very beginning
+	void restart()	// start at the very beginning
 	{
 	    currentCycle = 0;
 	    remainingTime = usages[0];
 	    log.clear();	// empty the log
 	}
 
-	void addLog( int time, char state )	// record an event
+	void addLog( int time, char state )
 	{
 	    log.pushBack( myId, time, state );
 	}
@@ -39,6 +38,32 @@ class Process
 	    return log;		// get summarized results at end
 	}
 
-	//  run for a little while (in .cpp file)
-	void run( int &clock, int allowance, char &next );
+	virtual bool isInteractive()
+        {
+	    return false;	// assume a background job
+	}
+
+	void run( int &, int, Device *& );
 };
+
+class Computation : public Process
+{
+    public:
+	Computation( int id );
+};
+
+class Download : public Process
+{
+    public:
+	Download( int id );
+};
+
+class Interact: public Process
+{
+    public:
+	Interact( int id );
+	bool isInteractive()
+	{
+	    return true;
+	}
+};	

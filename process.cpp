@@ -1,37 +1,22 @@
 #include "process.h"
-
-//  Process Constructor
-//  Initalizes a process as a single burst of CPU usage,
-//  which may or may not be allowed to run all at once.
-//  When that CPU time is complete, so is the process.
-
-Process::Process( int id )  // a constructor
-{
-    myId = id;
-    bursts = 4 + rand() % 3;    // several CPU bursts
-    for (int i=0; i < bursts; i++)
-    {
-        usages[i] = 80 + rand() % 120;
-        nextState[i] = 'D';     // some disk activity
-    }
-    nextState[bursts-1] = 'Q';  // all done!
-}
+#include "device.h"
 
 //  Run a Process for some time
 //  The process would like to complete its current CPU burst,
 //  but is currently only allowed what is granted to it.
 //  Parameters:
-//  	clock		(modified int)	time on simulation clock
-//  	allowance	(input int)	time allowed to run with
-//	next		(output char)	the process next state after this
-//		'Q' = complete;  'X' = wishes more CPU;  'D' == wishes disk
+//      clock           (modified int)  time on simulation clock
+//      allowance       (input int)     time allowed to run with
+//      next            (output Device) what device should be used next
+//		next is from { disk, net, console, cpu )
 //  Post-Condition:
-//  	the clock will have advanced until either the allowed time
-//  	has been used up, or the current CPU burst is complete
-//  	(whichever happens earlier).  There will be no idle CPU time.
+//      the clock will have advanced until either the allowed time
+//      has been used up, or the current CPU burst is complete
+//      (whichever happens earlier).  There will be no idle CPU time.
 //  Also:  The history log for this Process will record what is known
-//  	at this time
-void Process::run( int &clock, int allowance, char &next )
+//      at this time
+
+void Process::run( int &clock, int allowance, Device *&next )
 {
     addLog(clock, 'X'); //process now using CPU
     int start; //records the initial clock time
@@ -39,9 +24,9 @@ void Process::run( int &clock, int allowance, char &next )
         remainingTime = remainingTime - 1;
     }
     if (remainingTime == 0) { // if current burst done
-        next = nextState[currentCycle];
-        if (next == 'Q') { //if done, mark in log
-            addLog(clock, next);
+        next = nextRequest[currentCycle];
+        if (next == NULL) { //if done, mark in log
+            addLog(clock, 'Q');
         }
         else {
             currentCycle = currentCycle + 1; //advance cycle
@@ -49,8 +34,44 @@ void Process::run( int &clock, int allowance, char &next )
         }
     }
     else { //still needs to finish CPU burst
-        next = 'X';
+        next = &cpu;
         addLog(clock, '-');
     }
 }
 
+Computation::Computation( int id )
+{
+    myId = id;
+    bursts = 4 + rand() % 3;	// several lengthy CPU bursts
+    for (int i=0; i < bursts; i++)
+    {
+        usages[i] = 200 + rand() % 120;
+        nextRequest[i] = &disk;	// some disk activity
+    }
+    nextRequest[bursts-1] = NULL;	// all done!
+}
+
+Download::Download( int id )
+{
+    myId = id;
+    bursts = 9;		// 4 chances to move data, then wrap up
+    for (int i=0; i < bursts; i++) {
+        usages[i] = 40 + rand() % 20;   // not much CPU needed
+        if (i%2 == 0)
+            nextRequest[i] = &net;	// alternate network
+        else
+            nextRequest[i] = &disk;	// and disk
+    }
+    nextRequest[bursts-1] = NULL;	// all done!
+}
+
+Interact::Interact( int id )
+{
+    myId = id;
+    bursts = 4;		// enough to simulate till others are all done
+    for (int i=0; i < bursts; i++) {
+        usages[i] = 30 + rand() % 20;
+        nextRequest[i] = &console;	// work with console
+    }
+    nextRequest[bursts-1] = NULL;	// all done!
+}

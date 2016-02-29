@@ -23,7 +23,7 @@
 #include <math.h>
 using namespace std;
 
-void displayHistory(Process history[], int size, int start, int stop )
+void displayHistory(Process *history[], int size, int start, int stop )
 {
     const int histLength = 50; //number of printable characters representing job history
     char display[histLength + 1]; //the character array that holds job history
@@ -31,7 +31,7 @@ void displayHistory(Process history[], int size, int start, int stop )
     cout << "Time: " << start << setw( histLength + 1) << stop << endl;
     
     for (int i = 0; i < size; i++) { //repeat for every process
-        ProcList &localHistory = history[i].getLog(); //reference to process log
+        ProcList &localHistory = history[i]->getLog(); //reference to process log
         localHistory.condense();
         ProcIterator iter = localHistory.begin(); //iterator to traverse the log
         
