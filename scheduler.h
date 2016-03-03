@@ -83,6 +83,9 @@ class Preempt : public Priority
 	Preempt() { name="Preemptive Priority"; }
 	int allowance()
 	{
-        return 1;
+        if ( future.empty() )   //nothing will interrupt, let highest priority use as long as needed
+            return Priority::allowance();
+        else                    //could have higher priority at leadTime(), only run until then and check again
+            return future.leadTime() - clock;
 	}
 };
