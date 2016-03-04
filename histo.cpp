@@ -4,7 +4,7 @@
 // series of time stamps, represented here as integer time values and
 // characters representing state.
 // Paramaters:
-//     history  input ProcList array	linked lists of events and times
+//     history  input		array of Process pointers
 //     size	input int		number of elements in array
 //     start	input int		beginning of time frame of interest
 //     stop	input int		end of time frame of interest
@@ -91,4 +91,3 @@ void displayHistory(Process *history[], int size, int start, int stop )
         cout << "|" << display << "|" << endl;
     }
 }
-
