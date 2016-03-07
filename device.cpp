@@ -13,7 +13,7 @@ void Device::request( int pid, int clock, Process *tasks[], ProcList &future )
         tasks[pid]->addLog(clock, action);
         readyTime = clock + duration;
     }
-    else { //will get device at time readyTime
+    else { //will get device when available
         tasks[pid]->addLog(clock, '-');
         tasks[pid]->addLog(readyTime, action);
         readyTime = readyTime + duration;

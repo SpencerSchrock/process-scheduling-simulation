@@ -18,7 +18,7 @@ int main()
    for (int i=0; i<4; i++)
    {
 	scheds[i]->runScheduler( tasks, arrival, 4 );
-	displayHistory( tasks, 4, 0, 1000 );
+	displayHistory( tasks, 4, 0, 3500 );
    }
 }
 

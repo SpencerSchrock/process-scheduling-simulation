@@ -1,37 +1,6 @@
 #include "scheduler.h"
 #include "device.h"
 
-const int DISKTIME = 200;		// how long a disk action requires
-
-//  Request to access the disk (secondary storage)
-//  A process may occasionally need to access a file or the
-//  virtual memory system.  The disk may only service one
-//  process at a time, and its readiness will be simulated
-//  with a time index also.
-//  Parameters:
-//  	pid  	  (input int)		process id (subscript to tasks[])
-//  	clock	  (input int)		overall simulation clock time
-//  	diskReady (modified int)	when the disk is available for use
-//	tasks	  (Process array)	given to update process history
-//	future	  (modified ProcList)	a process may proceed after using disk
-//
-/*
-void diskRequest( int pid, int clock, int &diskReady, Process tasks[], ProcList &future )
-{
-    if ( clock >= diskReady ) { //disk is free, will get now
-        tasks[pid].addLog(clock, 'D');
-        diskReady = clock + DISKTIME;
-    }
-    else { //will get disk at time diskReady
-        tasks[pid].addLog(clock, '-');
-        tasks[pid].addLog(diskReady, 'D');
-        diskReady = diskReady + DISKTIME;
-    }
-    tasks[pid].addLog(diskReady, '-');  //now waiting for CPU
-    future.insert(pid, diskReady, 'X'); //add back into future
-}
-*/
-
 //  Scheduler Simulation
 //  Simulates a process scheduler for a collecdtion of tasks
 //  Parameters:
@@ -50,24 +19,22 @@ void diskRequest( int pid, int clock, int &diskReady, Process tasks[], ProcList 
 void Scheduler::runScheduler( Process *tasks[], int arrival[], int size)
 {
     int pid;			// process wanting action
-    Device *next;		// and the action it wants
+    Device *next;		// and the device it wants
     clock = 0;			// initialize simulation clock
     
-    cpu.restart();
+    cpu.restart(); //initialize devices for each simulation
     disk.restart();
     net.restart();
     console.restart();
     
-    for (int i=0; i < size; i++)
-    {
+    for (int i=0; i < size; i++) {
         future.insert( i, arrival[i], 'X');	// all want to run
         tasks[i]->restart();			// and start at beginning
         tasks[i]->addLog( arrival[i], '-');	// might have to wait
     }
 
     //  repeat while anything is ready to run now or later
-    while ( !noneReady() || !future.empty() )
-    {
+    while ( !noneReady() || !future.empty() ) {
         //load new processes ready to be run
         while ( !future.empty() && future.leadTime() <= clock ) {
             char hold;
