@@ -24,16 +24,13 @@ using namespace std;
 //      even if it had to be created to do so
 void ProcTree::recursiveInsert( ProcTreeNode *&node, int val )
 {
-    if (node == NULL) {
+    if (node == NULL) { //base case
         node = new ProcTreeNode(val);
-    }
-    else if (node->procID == val) {
-        ;
     }
     else if (val < node->procID) {
         recursiveInsert(node->left, val);
     }
-    else {
+    else if (val > node->procID) {
         recursiveInsert(node->right, val);
     }
 }
@@ -60,7 +57,7 @@ int ProcTree::recursiveRemoveMax( ProcTreeNode *&nodel )
     if (nodel->right == NULL) {
         int result = nodel->procID;
         ProcTreeNode *removal = nodel;
-        nodel = nodel->left;
+        nodel = nodel->left; //handles left subtree if there is one
         delete removal;
         return result;
     }

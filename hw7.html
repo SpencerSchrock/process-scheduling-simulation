@@ -1,0 +1,114 @@
+<html>
+<STYLE type="text/css">
+OL.withalpha { list-style-type: lower-alpha }
+</STYLE>
+<center>
+<h3>CMPSC 122<br>
+Spring 2016</h3>
+
+<h3>Homework VII<br>
+25 April 2016</h3>
+</center>
+This assignment provides an opportunity to get a little
+more creative in the object-oriented design in the
+simulated problem area.  After all, a simulation will
+appear more meaningful if it more closely resembles
+what it is really simulating.
+<p>
+<h4>PROBLEM DESCRIPTION</h4>
+So far, all of the scheduling models have had a small
+set of processes already defined to be arriving at 
+very short intervals.  In reality, of course, programs
+do not just materialize out of thin air, but are 
+initiated by real people.
+<p>
+The most common programming environment nowadays only
+have one actual person present.  Even in a big computer lab,
+every individual is likely sitting at a workstation that is
+completely independent of the next with its own CPU.
+Therefore, to improve our model, we will assume that 
+all processes are initiated by a single user.
+<p>
+From the point of view of the CPU, there is no particularly
+identifiable 'human' interface -- most of the interaction
+is through the console.  Therefore, most of the work for this
+assignment will be done by redefining the behavior
+of the <tt>console</tt> object, treating it as a new
+class derived from the <tt>Device</tt> class.
+<p>
+<h4>HOMEWORK DETAILS</h4>
+First, let us get some sense of scale.  Some of the numbers
+already defined in the projects might make sense in terms
+of milliseconds (such as 1000 ms for a user to respond to
+a prompt for input, or 200 for how much CPU time is used
+by a process).  It doesn't seem right to expect a user
+to start new processes only 40 milliseconds apart, but perhaps
+further apart in time.
+<p>
+Of course, the scheduling problem is not so very interesting
+if every program completes before the next one begins, so
+to get a meaningful simulation, you may need to increase some
+of the values defined in <tt>process.h</tt> and <tt>process.cpp</tt>
+with respect to number of CPU bursts, sizes of arrays, etc.,
+perhaps so that some processes may require several seconds to complete overall.
+<p>
+Also, since a user's decision to launch a new program or application
+is not strictly based on an existing program's request for keyboard input,
+you will need to add a method to a <tt>console</tt> object to create
+new processes at any time.
+<p>
+<h4>SIMULATING A USER</h4>
+So, there will be some object simulating a user at the workstation.
+The user is occasionally prompted by a program requesting input
+(as has been addressed in the simulation since Homework 4). Now
+now the user will also be given the opportunity to choose to start a process at any other time.
+<p>
+The user will certainly have some way of knowing how much time has
+passed since his last activity (input or process launch), which can
+be incorporated into the simulation.  The user will also certainly
+know how many processes are currently active, and generally what sort
+of processes there are.
+<p>
+The rest of the design is up to you, to be well-documented and explained,
+as well as implemented.  Starting with no active processes on the system,
+one is started, and then perhaps another.  Each new tab on a browser
+would launch a process to download the page.  There may be an interactive
+application (but it is unlikely for someone to play more than one
+flash game at a time, or to start a new download while playing).
+<p>
+Also, this is to be a <em>simulated</em> user, so that the simulation
+can proceed and see how well process scheduling works for that environment.
+Your program is NOT expected to actually ask the TA what sort of process
+to add to a simulation, etc.
+<p>
+For full credit, your program is expected to (1) have a reasonably
+good model of how a user might behave, with respect to starting
+processes (depending on what processes are already active),
+(2) a model in which at least four processes may be active at
+the same time, so that scheduling policy is relevant, and
+(3) some qualitative description of the results, regarding the
+simulation model and the scheduling policies.
+<p>
+EXTRA CREDIT OPTIONS:<br>
+There is room here for even more creativity with respect to the
+modeling for the simulation, or the implementation thereof.
+<p>
+1) Define additional meaningful models of processes.  The existing
+ones are very simple, but perhaps some models might represent
+other applications (such as none of these represents a text processor).
+<p>
+2) How long a console input takes very much depends on the nature
+of that input -- e.g. an on-line quiz, an action game, and a browser
+all would have very different amounts of time between the last
+output to the screen and the next input.  The <tt>request</tt> method
+for the simulated <tt>console</tt> should possibly address that.
+<p>
+3) One could also determine the effect of system load, given a
+particular scheduling policy.  For example, how much does the
+Average Response Time degrade when additional batch operations
+(such a file download) are added into the system?  Could you really
+play your Flash Applets while waiting for a download to complete?
+<p>
+No point scale has yet been devised for any of these Extra Credit
+options, since so much variety is possible, and many students will
+have no need to pursue it.

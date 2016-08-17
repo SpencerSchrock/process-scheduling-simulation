@@ -99,7 +99,7 @@ void ProcList::condense()
     ProcListElement *curr; //stores the pointer to the current node
     ProcListElement *removal; //element to be removed
     //case 1 loop for removing head. as long as the head is a unneeded time remove it
-    while (head != NULL && head->time == head->next->time) {
+    while (head != NULL && head->next != NULL && head->time == head->next->time) {
         removal = head;
         head=head->next;
         delete removal;
