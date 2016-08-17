@@ -5,20 +5,22 @@
 using namespace std;
 
 #include "scheduler.h"
-#include "device.h"
 
 int main()
 {
-   Scheduler *scheds[] = 	    // make some process schedulers
-	{ new FCFS(), new RoundRobin(), new Priority(), new Preempt() };
-   Process *tasks[] = 		    // 4 processes
-	{ new Computation(0), new Download(1), new Download(2), new Interact(3) };
-   int arrival[] = {0, 40, 80, 120};   // arrive at these times
+   Scheduler sched;		    // make a process scheduler
+   Process tasks[] = 		    // 3 processes
+	{ Process(0), Process(1), Process(2) };	
+   int arrival[] = {0, 40, 80};   // arrive at these times
  
-   for (int i=0; i<4; i++)
-   {
-	scheds[i]->runScheduler( tasks, arrival, 4 );
-	displayHistory( tasks, 4, 1000, 2000 );
-   }
+   cout << "First Come First Served" << endl;
+   sched.runScheduler( tasks, arrival, 3, 500000 );	// FIFO
+   displayHistory( tasks, 3, 0, 500 );
+   cout << endl << "Quanta of 70" << endl;
+   sched.runScheduler( tasks, arrival, 3, 70 );	// RR generous
+   displayHistory( tasks, 3, 0, 500 );
+   cout << endl << "Quanta of 10" << endl;
+   sched.runScheduler( tasks, arrival, 3, 10 );	// RR stingy
+   displayHistory( tasks, 3, 0, 500 );
 }
 

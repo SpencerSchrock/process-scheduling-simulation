@@ -45,10 +45,10 @@ ProcIterator ProcList::end()
 void ProcList::pushBack( int procId, int time, char state )
 {
    ProcListElement *newEle = new ProcListElement( procId, time, state );
-   if (head == NULL)		// no list yet
-	   head = newEle;
+   if (head == NULL)		// if no list yet
+	   head = newEle;		//    start with this one
    else
-	   tail->next = newEle;	// add to end of list
+	   tail->next = newEle;	// or last element now has a successor
    tail = newEle;
 }
 
@@ -57,16 +57,14 @@ void ProcList::pushBack( int procId, int time, char state )
 //  from the removed element.  The time index is considered unnecessary.
 void ProcList::popFront( int &procId, char &state )
 {
-	if (head != NULL)		// if list non-empty list
+	if (head != NULL)		// can only remove from non-empty list
 	{
-		ProcListElement *removal = head;	// element to be removed
-		procId = head->procID; //store pid
-		state = head->state; //store state
-		head = head->next;	// update new head
-		delete removal;		// deallocate removed element
+		ProcListElement *removal = head;	// remember what is being removed
+		procId = head->procID;
+		state = head->state;
+		head = head->next;	// the second item is now first
+		delete removal;		// deallocate expired element
 	}
-	else
-		procId = -1; //empty list, indicate with invalid pid
 }
 
 //  adds a new element into a sorted linked list
@@ -75,13 +73,11 @@ void ProcList::insert( int procId, int time, char state )
 {
    ProcListElement *newEle = new ProcListElement( procId, time, state );
    ProcListElement *curr = head;
-    if ( head == NULL || time < head->time ) //if element needs to be inserted at front
-    {
-        newEle->next = head;
+    if (head == NULL) {
         head = newEle;
     }
-    else { //add to after existing element
-        while( curr->next != NULL && curr->next->time < time)
+    else {
+        while( curr->next != NULL && time > curr->next->time)
             curr = curr->next;
         newEle->next = curr->next;
         curr->next = newEle;
@@ -96,36 +92,4 @@ void ProcList::insert( int procId, int time, char state )
 //    the second can be removed (did not actually change state)
 void ProcList::condense()
 {
-    ProcListElement *curr; //stores the pointer to the current node
-    ProcListElement *removal; //element to be removed
-    //case 1 loop for removing head. as long as the head is a unneeded time remove it
-    while (head != NULL && head->time == head->next->time) {
-        removal = head;
-        head=head->next;
-        delete removal;
-    }
-    
-	curr = head; //set the loop variable to loop through for case 1
-
-    while(curr != NULL && curr->next != NULL){ //case 1, loop through log history
-        //while the next and next-next elements are duplicates, remove the first one
-        while (curr->next->next != NULL && curr->next->time == curr->next->next->time){
-            removal = curr->next;
-            curr->next = curr->next->next;
-            delete removal;
-        }
-        curr = curr->next;
-    }
-    
-    curr = head; //reset the loop variable to loop through for case 2
-
-    while(curr != NULL && curr->next != NULL) { //case 2, go through log history
-        //as long as the states are the same remove the second one
-        while (curr->next != NULL && curr->state == curr->next->state) {
-            removal = curr->next;
-            curr->next = curr->next->next;
-            delete removal;
-        }
-        curr = curr->next;
-    }
 }

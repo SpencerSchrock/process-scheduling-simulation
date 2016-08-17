@@ -1,77 +1,53 @@
 #include "process.h"
-#include "device.h"
+
+//  Process Constructor
+//  Initalizes a process as a single burst of CPU usage,
+//  which may or may not be allowed to run all at once.
+//  When that CPU time is complete, so is the process.
+
+Process::Process( int id )  // a constructor
+{
+    myId = id;
+    bursts = 1;         // one big CPU requirement now
+    usages[0] = 80 + rand() % 120;
+    nextState[0] = 'Q'; // all done!
+}
 
 //  Run a Process for some time
 //  The process would like to complete its current CPU burst,
 //  but is currently only allowed what is granted to it.
 //  Parameters:
-//      clock           (modified int)  time on simulation clock
-//      allowance       (input int)     time allowed to run with
-//      next            (output Device) what device should be used next
-//		next is from { disk, net, console, cpu )
+//  	clock		(modified int)	time on simulation clock
+//  	allowance	(input int)	time allowed to run with
+//	next		(output char)	the process next state after this
+//		'Q' = process is complete;  'X' = process wishes to run more
 //  Post-Condition:
-//      the clock will have advanced until either the allowed time
-//      has been used up, or the current CPU burst is complete
-//      (whichever happens earlier).  There will be no idle CPU time.
+//  	the clock will have advanced until either the allowed time
+//  	has been used up, or the current CPU burst is complete
+//  	(whichever happens earlier).  There will be no idle CPU time.
 //  Also:  The history log for this Process will record what is known
-//      at this time
-
-void Process::run( int &clock, int allowance, Device *&next )
+//  	at this time
+void Process::run( int &clock, int allowance, char &next )
 {
-    addLog(clock, 'X'); //process now using CPU
-    int start; //records the initial clock time
-    for(start = clock; clock-start < allowance && remainingTime > 0; clock++) { //run while allowed or needed
-        remainingTime = remainingTime - 1;
+    //cout << "PID: " << myId << " Usage: " << usages[0] << endl;
+	remainingTime = usages[currentCycle];
+    addLog(clock, next);
+	int start = 0;
+    for(start = clock; clock-start < allowance && remainingTime > 0; clock++) {
+        remainingTime= remainingTime - 1;
     }
-    if (remainingTime == 0) { // if current burst done
-        next = nextRequest[currentCycle];
-        if (next == NULL) { //if done, mark in log
-            addLog(clock, 'Q');
-        }
-        else {
-            currentCycle = currentCycle + 1; //advance cycle
-            remainingTime = usages[currentCycle]; //update time for next CPU burst
-        }
+    if (remainingTime == 0) {
+        next = 'Q';
+        addLog(clock, 'Q');
     }
-    else { //still needs to finish CPU burst
-        next = &cpu;
+    else {
         addLog(clock, '-');
     }
+	if (currentCycle != 9)
+		currentCycle = currentCycle + 1;
+	else
+		currentCycle = 1;
+	usages[currentCycle] = remainingTime;
+    //cout << "Clock: " << clock << " Time Left: " << usages[0] << endl;
 }
 
-Computation::Computation( int id )
-{
-    myId = id;
-    bursts = 4 + rand() % 3;	// several lengthy CPU bursts
-    for (int i=0; i < bursts; i++)
-    {
-        usages[i] = 200 + rand() % 120;
-        nextRequest[i] = &disk;	// some disk activity
-    }
-    nextRequest[bursts-1] = NULL;	// all done!
-}
-
-Download::Download( int id )
-{
-    myId = id;
-    bursts = 9;		// 4 chances to move data, then wrap up
-    for (int i=0; i < bursts; i++) {
-        usages[i] = 40 + rand() % 20;   // not much CPU needed
-        if (i%2 == 0)
-            nextRequest[i] = &net;	// alternate network
-        else
-            nextRequest[i] = &disk;	// and disk
-    }
-    nextRequest[bursts-1] = NULL;	// all done!
-}
-
-Interact::Interact( int id )
-{
-    myId = id;
-    bursts = 4;		// enough to simulate till others are all done
-    for (int i=0; i < bursts; i++) {
-        usages[i] = 30 + rand() % 20;
-        nextRequest[i] = &console;	// work with console
-    }
-    nextRequest[bursts-1] = NULL;	// all done!
-}

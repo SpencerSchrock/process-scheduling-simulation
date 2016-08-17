@@ -2,7 +2,6 @@
 using namespace std;
 
 #include "histo.h"
-#include "proctree.h"
 
 // Process Scheduler
 // This represents the part of an operating system that manages processes,
@@ -15,77 +14,23 @@ using namespace std;
 
 class Scheduler
 {
-    protected:
+    private:
 	ProcList readySet;	// set of processes ready to run
 	ProcList future;	// list of future events
 	int clock;		// current clock time for simulation
-	string name;		// name of the scheduling algorithm
     public:
-	virtual void addProcess( int procId )
+	void addProcess( int procId )
 	{
 	    readySet.pushBack( procId, 0, 'X');
 	}
-	virtual void chooseProcess( int &procId )
+	void chooseProcess( int &procId )
 	{
 	    char hold;
 	    readySet.popFront( procId, hold );
 	}
-	virtual int allowance()	
-	{
-	    return 100000;	// a long time
-	}
-	virtual bool noneReady()
+	bool noneReady()
 	{
 	    return readySet.empty();
 	}
-    virtual void runScheduler( Process* [], int[], int );
-};
-
-class FCFS : public Scheduler  
-{
-    public:
-	FCFS() { name="First Come First Served"; }
-};
-
-class RoundRobin : public Scheduler
-{
-    public:
-	RoundRobin() { name="Round Robin"; }
-	int allowance()
-	{
-	    return 70;
-	}   
-};
-
-class Priority : public Scheduler
-{
-    private:
-	ProcTree tree;		// record order in a tree
-    public:
-	Priority() { name="Priority"; }
-	void addProcess( int procId )
-	{
-	    tree.insert( procId );
-	}
-	void chooseProcess( int &procId )
-	{
-	    procId = tree.removeMax();
-	}
-	bool noneReady()
-	{
-	    return tree.empty();
-	}
-};
-
-class Preempt : public Priority
-{
-    public:
-	Preempt() { name="Preemptive Priority"; }
-	int allowance()
-	{
-        if ( future.empty() )   //nothing will interrupt, let highest priority use as long as needed
-            return Priority::allowance();
-        else                    //could have higher priority at leadTime(), only run until then and check again
-            return future.leadTime() - clock;
-	}
+    void runScheduler( Process[], int[], int, int );
 };

@@ -1,0 +1,157 @@
+<html>
+<STYLE type="text/css">
+OL.withalpha { list-style-type: lower-alpha }
+</STYLE>
+<center>
+<h3>CMPSC 122<br>
+Spring 2016</h3>
+
+<h3>Homework II<br>
+5 February 2016</h3>
+</center>
+
+This assignment introduces the definition of classes, and their
+use in the implementation and use of a simple linked list.
+These will then be used to implement some simple scheduling policies.
+<p>
+<h4>PROBLEM DESCRIPTION</h4>
+<p>
+This assignment will simulate a job scheduler by defining a collection
+or processes and then choosing which will execute next.  There are
+several possible policies that may be applied to choose what gets
+to use the CPU, so that problem will be factored out into a separate
+part of the program.
+<p>
+Here is a very rough sketch of the simulation:
+<pre>
+while there are any programs wishing to run in the present or the future
+    1) pick a program to run
+    2) give it the CPU to run for some time
+    3) decide what to do with this process
+       (it may be finished now, or may continue to run later)
+</pre>
+1) There are many different scheduling policies, but this assignment will simply run the processes in the order in which they appear -- which is very easy to do with a linked list.
+<p>
+2) No Operating System can accurately predict just how much time any process will need to use the CPU.  It might have very little work to do, and finishes quickly.  Or it may get stuck in an infinite loop and try to run indefinitely.  To guard against the latter, one can just put a limit on one process, after which the CPU is taken away and passed to another.
+<p>
+3) If a process is done, it is removed from the system (and we will put a 'Q' at the end of its history).  If it still wants to run some more, we will just put it back into the set of processes that wish to use the CPU.
+<h4>SPECIFICATION DETAILS:</h4>
+Most of the simulation details above will be handled by these objects and methods:
+<ul>
+<li><tt>Process::run</tt><br>Allows the specified process to run for a little while.  One parameter gives an upper limit on the time allowed.  One parameter represents the simulation clock, which increases to show the passage of time (depending on how much CPU time this processor uses).  And a return parameter indicates what the process wishes to do after it runs -- run some more ('X') or finish ('Q').
+<li><tt>Scheduler::runScheduler</tt><br>Represents the overall simulation, as hinted at by the rough pseudocode above.  Its parameter list includes a description of all the processes in the system and when they arrived.  One parameter specifies the upper time limit for each call to <tt>Process::run</tt>, to see the effect that has on overall behavior.
+</ul>
+There are also several list-related functions defined to assist with this and later assignments.  The contents of each list element would be good to know:
+<p>
+Each list includes a process ID (just a small integer in this project),
+a time index, and a process state (such as 'X' or '-').  This list will
+serve three very different purposes in this project:
+<ul>
+<li> <tt>Process::log</tt> will record the complete history of each process during the simulation,
+i.e. the data to be displayed by the code from Homework 1.  A sensible simulation should record this information in chronological order.
+<li> <tt>Scheduler::readySet</tt> will record the collection of processes currently wishing to use the CPU.  The only essential information here is the process ID, which is nothing more than a subscript to an array of Processes.
+<li> <tt>Scheduler::future</tt> will record events that will occur in the simulation's future.  For example, not all processes are ready to run at time 0; in later assignments, they will also not be ready to run until certain other operations complete.  This list must be kept in chronological order.
+</ul>
+<p>
+<h4>HEADER FILES</h4>
+Header files (.h) will now begin to declare classes and their methods,
+and source files (.cpp) will implement many of those methods.
+<p>
+Taking a closer look at the class declarations:
+<p>
+<b><tt>proclist.h</tt></b><br>
+This file declares a single-linked list along with an iterator.
+The ProcList class implements some very simple accessor methods
+to assist with the simulation.  Since this List will often only
+be used as a queue, the only peeks at the list are at the time
+values for the time-ordered list of future events.   Looking at
+any other within the list would require use of a ProcIterator.
+<p>
+<b><tt>process.h</tt></b><br>
+This describes a single process that wishes to use the computer system.
+Every process is assigned an identifier for easy reference -- for this project,
+this will be nothing more than its assigned subscript in an array.
+<br>
+The process behavior is represented as a series of alternating usages
+of the CPU, which may be separated by other devices (in the next assignment).
+Later, the project will compare various scheduling policies on the
+same set of processes, so one set of variables will be assigned at
+process creation time and left unchanged, and some others will record
+how far it has executed.  A log is included to record its complete history.
+Some simple functions are defined to maintain this log history, and
+then to provide that history to the <tt>displayHistory</tt> function.
+<p>
+<b><tt>scheduler.h</tt></b><br>
+This declares the scheduler object, along with some very simple
+functions regarding the subset of processes that currently wish
+to use the CPU.  These three functions have been isolated, because
+their behavior will differ for other scheduling policies later in the 
+course.  It is strongly recommended to make use of these methods,
+so that the <tt>runScheduler</tt> implementation will work equally
+well with all policies later.
+<p>
+Usually only the accessor methods for a class appear in a header
+file, but often I will put any very short function in there as well.
+A function that is implemented within a class definition in C++
+becomes an <tt>in-line</tt> function, meaning that when the compiler
+encounters a function call, it simply expands the function code
+in place.  This does yield code duplication in the executable file
+(so should not be done for large functions) -- but it avoids the
+need to call and return, which would dominate the execution time
+of a simple accessor method.
+<p>
+Conversely, there are several occasions this semester where
+a constructor method does NOT appear in the header file,
+because it is doing considerable work, such as filling arrays.
+<h4>COMPONENT FILES</h4>
+Here is a summary of all the files for this assignment:
+<p>
+<table border>
+<tr><td><tt>process.h</tt><td>Declares the description of a process<br>DO NOT CHANGE
+<tr><td><tt>process.cpp</tt><td>Initializes a process and simulates its CPU usage<br>
+Complete method <tt>Process::run</tt>
+<tr><td><tt>scheduler.h</tt><td>Declares the process scheduler object<br>DO NOT CHANGE
+<tr><td><tt>scheduler.cpp</tt><td>Implements the scheduler simulation<br>
+Complete method <tt>Scheduler::runScheduler</tt>
+<tr><td><tt>proclist.h</tt><td>Declares the list elements, the list, and an iterator<br>DO NOT CHANGE
+<tr><td><tt>proclist.cpp</tt><td>Implements the list and its iterator</tt><br>
+Complete <tt>ProcList::pushBack, ProcList::popFront,</tt> and <tt>ProcList::insert</tt>
+<tr><td><tt>histo.h</tt><td>Declaration of display function<br>DO NOT CHANGE, but notice the change in interface
+<tr><td><tt>histo.cpp</tt><td>Implementation of display function<br>
+Some editing is required, since the parameter list now includes an array of processes containing linked lists instead of two parallel arrays.  Complete and submit.
+<tr><td><tt>driver.cpp</tt><td>Some code to test the scheduling simulation<br>
+Feel free to edit as desired, but do not submit.<br>
+A very different version of this file will be used for grading.
+</table>
+<p>
+The files to be submitted for this assignment are 
+<tt>process.cpp, proclist.cpp, scheduler.cpp</tt> and <tt>histo.cpp</tt>.
+Include them all within a single dropbox submission.
+<p>
+<h4>EXTRA CREDIT OPTION</h4>
+<p>
+An important part of the simulation above is to record information
+for each process about its history.  A simple straight-forward 
+implementation may actually insert a few list elements that actually
+do not contain useful information.
+<p>
+If a process is not given enough allowance to use all the CPU time
+it desires, then it may have wait and resume later.  It is very
+simple to just make that assumption and insert a list element with 
+the '-' indicating that it will wait.
+<p>
+But on some occasions, no waiting actually occurs (such as if there
+is no other process in the system).  The resulting job history would
+then have two consecutive elements with the same time index,
+indicating that the first has no actual duration.
+<p>
+Furthermore, removing these zero-time elements may lead to two
+consecutive elements describing the same state -- implying a state
+change when there is none (the second would add no information).
+<p>
+The extra credit assignment then is to remove these unnecessary
+list elements.  A method has been declared (<tt>ProcList::condense</tt>)
+for this purpose.  Complete it to remove and deallocated unwanted list nodes.
+<p>
+Be sure to place a notice in the ANGEL Message Box to the grader
+that you have attempted this feature.

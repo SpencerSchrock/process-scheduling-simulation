@@ -61,7 +61,7 @@ class ProcList
 	{
 	    int i; char c;	// just placeholders
 	    while (head != NULL)
-		popFront( i, c );
+            popFront( i, c );
 	}
 	ProcIterator begin();
 	ProcIterator end();
