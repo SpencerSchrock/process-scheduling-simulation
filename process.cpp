@@ -42,10 +42,10 @@ void Process::run( int &clock, int allowance, Device *&next )
 Computation::Computation( int id )
 {
     myId = id;
-    bursts = 4 + rand() % 3;	// several lengthy CPU bursts
+    bursts = 15 + rand() % 3;	// several lengthy CPU bursts
     for (int i=0; i < bursts; i++)
     {
-        usages[i] = 200 + rand() % 120;
+        usages[i] = 400 + rand() % 120;
         nextRequest[i] = &disk;	// some disk activity
     }
     nextRequest[bursts-1] = NULL;	// all done!
@@ -54,7 +54,7 @@ Computation::Computation( int id )
 Download::Download( int id )
 {
     myId = id;
-    bursts = 9;		// 4 chances to move data, then wrap up
+    bursts = 15;     // 4 chances to move data, then wrap up
     for (int i=0; i < bursts; i++) {
         usages[i] = 40 + rand() % 20;   // not much CPU needed
         if (i%2 == 0)
@@ -68,10 +68,13 @@ Download::Download( int id )
 Interact::Interact( int id )
 {
     myId = id;
-    bursts = 4;		// enough to simulate till others are all done
+    bursts = 7;		// enough to simulate till others are all done
     for (int i=0; i < bursts; i++) {
         usages[i] = 30 + rand() % 20;
-        nextRequest[i] = &console;	// work with console
+		if (i % 2 == 0)
+			nextRequest[i] = &master;	// alternate new processes
+		else
+			nextRequest[i] = &console;	// and user input
     }
     nextRequest[bursts-1] = NULL;	// all done!
 }
