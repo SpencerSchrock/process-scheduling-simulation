@@ -54,7 +54,7 @@ Computation::Computation( int id )
 Download::Download( int id )
 {
     myId = id;
-    bursts = 9;		// 4 chances to move data, then wrap up
+    bursts = 9;     // 4 chances to move data, then wrap up
     for (int i=0; i < bursts; i++) {
         usages[i] = 40 + rand() % 20;   // not much CPU needed
         if (i%2 == 0)

@@ -1,37 +1,6 @@
 #include "scheduler.h"
 #include "device.h"
 
-const int DISKTIME = 200;		// how long a disk action requires
-
-//  Request to access the disk (secondary storage)
-//  A process may occasionally need to access a file or the
-//  virtual memory system.  The disk may only service one
-//  process at a time, and its readiness will be simulated
-//  with a time index also.
-//  Parameters:
-//  	pid  	  (input int)		process id (subscript to tasks[])
-//  	clock	  (input int)		overall simulation clock time
-//  	diskReady (modified int)	when the disk is available for use
-//	tasks	  (Process array)	given to update process history
-//	future	  (modified ProcList)	a process may proceed after using disk
-//
-/*
-void diskRequest( int pid, int clock, int &diskReady, Process tasks[], ProcList &future )
-{
-    if ( clock >= diskReady ) { //disk is free, will get now
-        tasks[pid].addLog(clock, 'D');
-        diskReady = clock + DISKTIME;
-    }
-    else { //will get disk at time diskReady
-        tasks[pid].addLog(clock, '-');
-        tasks[pid].addLog(diskReady, 'D');
-        diskReady = diskReady + DISKTIME;
-    }
-    tasks[pid].addLog(diskReady, '-');  //now waiting for CPU
-    future.insert(pid, diskReady, 'X'); //add back into future
-}
-*/
-
 //  Scheduler Simulation
 //  Simulates a process scheduler for a collecdtion of tasks
 //  Parameters:
@@ -47,27 +16,26 @@ void diskRequest( int pid, int clock, int &diskReady, Process tasks[], ProcList 
 //  wishing to use the CPU, and a future list of events that will
 //  occur later in the simulation.  A simulation clock advances to
 //  identify which events occur in which order.
+
 void Scheduler::runScheduler( Process *tasks[], int arrival[], int size)
 {
     int pid;			// process wanting action
-    Device *next;		// and the action it wants
+    Device *next;		// and the device it wants
     clock = 0;			// initialize simulation clock
     
-    cpu.restart();
+    cpu.restart(); //initialize devices for each simulation
     disk.restart();
     net.restart();
     console.restart();
     
-    for (int i=0; i < size; i++)
-    {
+    for (int i=0; i < size; i++) {
         future.insert( i, arrival[i], 'X');	// all want to run
         tasks[i]->restart();			// and start at beginning
         tasks[i]->addLog( arrival[i], '-');	// might have to wait
     }
-
+    
     //  repeat while anything is ready to run now or later
-    while ( !noneReady() || !future.empty() )
-    {
+    while ( !noneReady() || !future.empty() ) {
         //load new processes ready to be run
         while ( !future.empty() && future.leadTime() <= clock ) {
             char hold;
@@ -80,11 +48,66 @@ void Scheduler::runScheduler( Process *tasks[], int arrival[], int size)
             chooseProcess(pid);
             tasks[pid]->run(clock, allowance(), next);
             if ( next == &cpu ) { //process still wants to run
-                future.insert(pid, clock, 'X'); //add back into future
+                addProcess(pid); //add back into future
             }
             else if ( next != NULL) { //wants device
                 next->request(pid, clock, tasks, future);
             }
         }
     }
+}
+
+// min heap insert
+//  Adapted from Prof. Christman's lecture notes
+//  Inserts a process into the min heap based on a process's remainingTime
+//  Parameters:
+//  	pid	(input int)		pid of process to insert
+//  Pre-condition:
+//      heap is not full, there are less than 20 processes overall
+void SRT::insert(int pid)
+{
+    int pos = nextEmpty; //insert into next empty space
+    while ( (pos > 1) && heap[pos/2]->getRemainingTime() > procs[pid]->getRemainingTime() )
+    {
+        heap[pos] = heap[pos/2];	// move parent down if it has more remaining time
+        pos = pos/2;		// continue towards root
+    }
+    heap[pos] = procs[pid];		// insert new data
+    nextEmpty++;
+}
+
+//  heap removal
+//  Adapted from Prof. Christman's lecture notes
+// Remove the process with the shortest reamining time and shift other processes
+//  Parameters:
+//  	none
+//  Pre-condition:
+//      heap is not empty
+//  Post-condition:
+//      return value is pid of process to run
+int SRT::pop()
+{
+    int pid = heap[1]->getID();	// return the shortest time process
+    bool done = false;          // not done fixing the heap
+    int pos = 1;
+    nextEmpty--;		// rightmost leaf now empty
+    heap[pos] = heap[ nextEmpty ];
+    int child = 2;			// the left child of the root
+    while (child < nextEmpty && !done )		// stop at bottom or when in order
+    {
+        if (child+1 < nextEmpty		// pick smaller child if it exists
+            && heap[child]->getRemainingTime() > heap[child+1]->getRemainingTime())
+            child = child+1;
+        if ( heap[child]->getRemainingTime() > heap[pos]->getRemainingTime() ) //if parent has less time
+            done = true;			//    heap is in order
+        else
+        {
+            Process *temp = heap[child]; //swap parent and child
+            heap[child] = heap[pos];
+            heap[pos] = temp;
+            pos = child;			// continue down the tree
+            child = 2*pos;			// starting with the new left child
+        }
+    }
+    return pid;
 }

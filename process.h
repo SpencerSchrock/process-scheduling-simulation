@@ -10,7 +10,7 @@ class Process
 
 	// A description of the process's total CPU needs
 	int bursts;		// total number of CPU bursts (<= 10)
-	int usages[10];		// lengths of each burst
+	int usages[10]; 		// lengths of each burst
 	Device *nextRequest[10];	// what to do after each burst
 
 	// A desription of what this process is doing now
@@ -39,11 +39,21 @@ class Process
 	}
 
 	virtual bool isInteractive()
-        {
+    {
 	    return false;	// assume a background job
 	}
 
 	void run( int &, int, Device *& );
+    
+    int getID()
+    {
+        return myId;
+    }
+    
+    int getRemainingTime()
+    {
+        return remainingTime;
+    }
 };
 
 class Computation : public Process

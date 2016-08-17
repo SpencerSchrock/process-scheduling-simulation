@@ -38,6 +38,10 @@ class Scheduler
 	{
 	    return readySet.empty();
 	}
+    string getName()
+    {
+        return name;
+    }
     virtual void runScheduler( Process* [], int[], int );
 };
 
@@ -86,6 +90,45 @@ class Preempt : public Priority
         if ( future.empty() )   //nothing will interrupt, let highest priority use as long as needed
             return Priority::allowance();
         else                    //could have higher priority at leadTime(), only run until then and check again
-            return future.leadTime() - clock;
+            return (future.leadTime() - clock);
 	}
+};
+
+class SRT : public Scheduler
+{
+private:
+    Process **procs;        // this scheduler's way of getting to process info
+
+    Process *heap[21];      //array for min heap, 20 process maximum and ignored 0 index
+    int nextEmpty = 1;      //start at index 1 for simpler math
+    void insert(int pid);     //add process to heap
+    int pop();              //return pid of root
+
+public:
+    SRT() { name="Shortest Remaining Time"; }
+    //  grabs the process information, and then runs the simulation
+    void runScheduler( Process* tasks[], int arrival[], int size)
+    {
+        procs = tasks;
+        Scheduler::runScheduler( tasks, arrival, size );
+    }
+    void addProcess( int procId )
+    {
+        insert(procId);
+    }
+    void chooseProcess( int &procId )
+    {
+        procId = pop();
+    }
+    bool noneReady()
+    {
+        return nextEmpty == 1;
+    }
+    int allowance() //preemptive
+    {
+        if ( future.empty() )   //nothing will interrupt, let SRT processes use as long as needed
+            return Scheduler::allowance();
+        else                    //could have shorter remaining at leadTime()
+            return (future.leadTime() - clock);
+    }
 };
