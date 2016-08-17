@@ -1,22 +1,23 @@
-#include "process.h"
-
 // History Displayer
 // Produces an Ascii-graphic representation of the history of a process
 // within a simulation of job scheduling.  The history is recorded as a
 // series of time stamps, represented here as integer time values and
 // characters representing state.
 // Paramaters:
-//     history  input ProcList array	linked lists of events and times
-//     size	input int		number of elements in array
+//     state	input char array	what state this job changed to
+//     times	input int array		when this job changed state
 //     start	input int		beginning of time frame of interest
 //     stop	input int		end of time frame of interest
 // Pre-Conditions:
-//     'history' concludes with an entry with state 'Q' for completion
+//     'state' consists of printable characters, with 'Q' marking end of job
+//     'times' consists of increasing positive integers
+//     the number of meaningful values in both arrays is equal (including 'Q')
 //     'start' and 'stop' are both positive integers, with start < stop
-//     NOTE:  either 'start' or 'stop' may exceed the largest value in 'when'
+//          and ( stop-start >= 20 )
+//     NOTE:  'start' or 'stop' may have values outside the range in 'when'
 // Results:
 //     A display of between 20 and 50 printable characters representing
 //     the job history within the time range of interest, using the
-//     characters stored within 'what'.  Events outside the actual range
+//     characters stored within 'state'.  Events outside the actual range
 //     of the job history will be displayed with blanks.
-void displayHistory( Process *history[], int size, int start, int stop );
+void displayHistory( const char state[], const int times[], int start, int stop );

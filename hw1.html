@@ -1,0 +1,130 @@
+<html>
+<STYLE type="text/css">
+OL.withalpha { list-style-type: lower-alpha }
+</STYLE>
+<center>
+<h3>CMPSC 122<br>
+Spring 2016</h3>
+
+<h3>Homework I<br>
+22 January 2016</h3>
+</center>
+
+This assignment exercises the programming skills developed in CMPSC 121.
+The student will need to solve a small non-trivial problem manipulating
+arrays and characters.
+<p>
+The interface is defined in this assignment already
+(and must be followed).  Additional functions may be designed to assist the solution, if desired.
+<p>
+<h4>PROBLEM DESCRIPTION</h4>
+<p>
+The overall project for this semester is to simulate process scheduling within an Operating System.  At any time, there may be any number of programs that wish to use the machine, but only one can be granted the CPU at a time.
+<p>
+Later assignments will address the process scheduling algorithms.  This assignment will work on the presentation of the results.  The goal is to produce a simple Ascii-graphic representation of the various process states as time progresses.
+<p>
+Here is an example representative of what may appear later in the term.
+<pre>
+Time:  1000                                         1500
+    1    DDDDDDDDDDDDDDDDDDD------XXXXNNNNNNNNNN-XXXXX
+    2    -------------------DDDDDDDDDDDDDDDDDDXXXNNNNN
+
+D = Disk   N = Network   X = Execute (CPU)   - = waiting
+</pre>
+This diagram shows just a small snapshot of the overall simulation
+between time indices 1000 and 1500.  It shows that Process #2
+has been wanting to access the Disk, and has to wait until Process #1
+is done with it.  After a decent period of Disk activity, it is
+able to proceed with its program (executing), at which point it
+wishes to access the Network.  Fortunately, it does not have
+to wait for that, since Process #1 finished with the network
+not long before.
+<p>
+On the other hand, when process #1 got its data from the network,
+it had to wait its turn for access the the CPU.
+<p>
+The purpose of the first assignment is not to perform the simulation,
+but to summarize the results in graphical form like that above.
+The actual representation of the data will actually use classes
+and objects, which will be presented later, but for now, the
+data will be represented in a pair of parallel arrays.
+<p>
+For example, the data that went into the diagram for process #2
+consisted of this information (along with much data outside the 1000-1500 range):
+<pre>
+State:   -     D     X     N
+Time:    1000  1220  1420  1460
+</pre>
+This indicates that the process began using the disk at 1220,
+the CPU at 1420, and the network at 1460.
+<p>
+<h4>SPECIFICATION DETAILS</h4>
+The task for this assignment is to implement a function that will
+display one row of the diagram above.  It will be given the complete
+history of a process with two parallel arrays (one containing characters
+such as 'X' and '0') and one containing numeric values representing time.
+<p>
+The number of array elements will not be provided, but the data will
+always be terminated by the symbol 'Q' among the characters.
+The 'Q' will not appear in the output -- it is merely an indicator
+that the data is finished, and does not represent any activity.
+<p>
+The function will also be provided two time indices indicating the
+beginning and end times of interest (such as 1000 and 1500) in the example.
+It is to limit its display to within that time range.
+<p>
+It is possible that the start time may be earlier than the smallest
+time stamp in the data, or for the ending time to be after the 
+largest time stamp.  In those cases, the output should display
+space characters -- non-space data should be restricted to the
+range of the simulation itself.
+<p>
+Also, this function must be scaleable, so a caller could effectively
+'zoom in' or 'zoom out' of the data.  It must occupy between 20 and 50
+character positions on the display, for any two endpoint times.
+For example, the above diagram used 45 characters to show each row,
+but if the total requested time was 1000, the above data might
+squeeze down into 23 characters out of 45.
+<p>
+NOTE: This 'zoom' behavior is to be determined exclusively from
+the parameters in the parameter list.  There is to be <em>no keyboard input</em>
+anywhere in this program.   The wide variety of values between 20 to 50
+is to allow some coding flexibility to work around possible rounding during divisions.
+<p>
+<h4>EXTRA CREDIT OPTION</h4>
+Sometimes a process may use very little CPU time, less than the 
+amount of  time represented by a single character of your display.
+Try to assure that this interesting bit of data is not squeezed
+out of existence.  This feature only applies to the 'X' character,
+and not to any others.
+<p>
+The score for this option will be evaluated based on simplicity
+and clarity as well as correctness.  Also be sure to notify the
+grader of your intent for credit in the Message Box on ANGEL.
+<p>
+<h4>COMPONENT FILES</h4>
+Header Files (.h) provide declarations to be used by other parts
+of a large project.  Generally these header files also have
+Source files (.cpp) that provide the implementation for
+functions whose prototypes appear in the header file.
+<p>
+After this assignment, header files will also declare classes,
+to allow for calling the methods within those classes.  This
+assignment's header, however, Only includes a single function declaration.
+<p>
+<table border>
+<tr><td><tt>histo.h</tt><td>Declares the history display functions<br>DO NOT CHANGE
+<tr><td><tt>histo.cpp</tt><td>Implements the display function<br>Complete and submit
+<tr><td><tt>driver.cpp</tt><td>Some code to test the display evaluation<br>
+Feel free to edit as desired, but do not submit.<br>
+A very different version of this file may be used for grading.
+</table>
+<p>
+The only file to be submit for this assignment is <tt>histo.cpp</tt>.
+It is expected to be compatible with the given header files.
+<p>
+<h4>IMPLEMENTATION HINT</h4>
+Instead of making complex decisions about what to output or when to output,
+it may be simpler to populate an array of characters that will hold your
+results and just display the entire array at once.  The <tt>cout</tt>
+object can output an array of characters as a single <tt>&lt;&lt;</tt> operation, if there is a null character at the end of the data.
